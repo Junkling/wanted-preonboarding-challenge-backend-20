@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: wanted-6
+
+  security:
+    user:
+      name: 1
+      password: 1
+  jpa:
+    #    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 1000
+
+    hibernate:
+      ddl-auto: update
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:13306/wanted_jun
+    username: root
+    password: 1234
+
+jwt:
+  secret: 'dsfiasfnsinflskfnlsnfkasnfklsnklfnsklnfklsanlf'
+  expiration_time:
+    acess: 86400
