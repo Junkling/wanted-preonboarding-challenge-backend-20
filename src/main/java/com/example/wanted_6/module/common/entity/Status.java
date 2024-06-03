@@ -9,6 +9,7 @@ public enum Status {
     ITEM_SOLD_OUT("판매완료"),
 
     ORDER_RESERVATION("예약 중"),
+    ORDER_CANCEL("예약 취소"),
     ORDER_COMPLETE("구매 완료"),
     ORDER_CONFIRM("구매 확정"),
     ;

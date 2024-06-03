@@ -8,6 +8,7 @@ import com.example.wanted_6.module.item.repository.ItemRepository;
 import com.example.wanted_6.module.order.dto.result.OrderResult;
 import com.example.wanted_6.module.order.entity.Orders;
 import com.example.wanted_6.module.order.repository.OrderRepository;
+import com.example.wanted_6.module.user.dto.payload.OrderUpdatePayload;
 import com.example.wanted_6.module.user.dto.result.UserSimpleResult;
 import com.example.wanted_6.module.user.entity.Users;
 import com.example.wanted_6.module.user.repository.UserRepository;
@@ -33,13 +34,12 @@ public class OrderService {
         Users users = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("유저 정보를 찾을 수 없습니다."));
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new NoSuchElementException("해당하는 상품이 없습니다."));
 
-        item.sell();
-
         Orders saved = orderRepository.save(
                 Orders.builder()
                         .consumer(users)
                         .orderPrice(item.getPrice())
                         .item(item)
+                        .seller(item.getSeller())
                         .orderStatus(Status.ORDER_RESERVATION)
                         .build());
 
@@ -69,6 +69,23 @@ public class OrderService {
         if (!orders.getConsumer().getId().equals(userId)) {
             throw new IllegalArgumentException("주문자가 아닙니다.");
         }
+        return toOrderResult(orders);
+    }
+
+    public Page<OrderResult> findAllBySellerId(Long userId, Pageable pageable) {
+        if (!userRepository.existsById(userId)) {
+            throw new IllegalArgumentException("유저 정보를 찾을 수 없습니다.");
+        }
+        return orderRepository.findAllBySellerId(userId, pageable).map(this::toOrderResult);
+    }
+
+    @Transactional
+    public OrderResult updateStatusByOrderId(Long orderId, Long userId, OrderUpdatePayload payload) {
+        Orders orders = orderRepository.findById(orderId).orElseThrow(() -> new NoSuchElementException("주문 정보가 없습니다."));
+        if (!orders.getSeller().getId().equals(userId)) {
+            throw new IllegalArgumentException("상품 판매자만 주문 상태를 변경 할 수 있습니다.");
+        }
+        orders.updateStatus(payload.getStatus());
         return toOrderResult(orders);
     }
 

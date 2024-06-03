@@ -22,7 +22,7 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<OrderResult> addOrder(@RequestBody OrderPayload payload, @AuthenticationPrincipal Long userId) {
-        OrderResult order = orderService.order(payload.getItemId(), userId);
+        OrderResult order = orderService.order(userId, payload.getItemId());
         return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
 
@@ -42,5 +42,4 @@ public class OrderController {
         OrderResult findOrder = orderService.findById(orderId, userId);
         return ResponseEntity.status(HttpStatus.OK).body(findOrder);
     }
-
 }

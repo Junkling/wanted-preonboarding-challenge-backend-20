@@ -43,7 +43,7 @@ public class ItemService {
     }
 
     @Transactional
-    public ItemResult updateItemByItemId(ItemEditPayload payload, Long itemId, Long userId) {
+    public ItemResult editItemByItemId(ItemEditPayload payload, Long itemId, Long userId) {
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new NoSuchElementException("상품 정보를 찾을 수 없습니다."));
         if (!item.getSeller().getId().equals(userId)) {
             throw new IllegalArgumentException("판매자만 수정 가능합니다.");
@@ -89,6 +89,8 @@ public class ItemService {
         }
         ItemResult itemResult = new ItemResult();
         itemResult.setId(item.getId());
+        itemResult.setPrice(item.getPrice());
+        itemResult.setStock(item.getStock());
         itemResult.setItemName(item.getItemName());
         itemResult.setSellerInfo(UserSimpleResult.of(item.getSeller()));
         itemResult.setItemStatus(status);

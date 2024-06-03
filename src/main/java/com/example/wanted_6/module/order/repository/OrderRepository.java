@@ -20,4 +20,7 @@ public interface OrderRepository extends JpaRepository<Orders, Long> {
     Page<Orders> findAllByItemItemNameContaining(String itemName, Pageable pageable);
 
     Page<Orders> findAllByOrderStatusEquals(Status status, Pageable pageable);
+
+    Page<Orders> findAllBySellerId(Long userId, Pageable pageable);
+
 }

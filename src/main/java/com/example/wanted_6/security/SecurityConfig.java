@@ -1,6 +1,7 @@
 package com.example.wanted_6.security;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -29,8 +30,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request ->
                         request
                                 .requestMatchers(HttpMethod.GET, "/items/**").permitAll()
-                                .requestMatchers("/users/**").permitAll()
-                                .requestMatchers("/api/admin/**").hasAuthority("ROLE_GREEN")
+                                .requestMatchers("/users/**","/error").permitAll()
+//                                .requestMatchers("/api/admin/**").hasAuthority("ROLE_GREEN")
                                 .anyRequest().authenticated())
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // session을 사용하지 않음

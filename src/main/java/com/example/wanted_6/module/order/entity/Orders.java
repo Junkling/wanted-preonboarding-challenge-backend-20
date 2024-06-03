@@ -23,8 +23,18 @@ public class Orders extends BaseEntity {
     private Users consumer;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    private Users seller;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     private Item item;
 
     @Enumerated(EnumType.STRING)
     private Status orderStatus;
+
+    public void updateStatus(Status status) {
+        if (status.equals(Status.ORDER_COMPLETE)) {
+            this.item.sell();
+        }
+        this.orderStatus = status;
+    }
 }

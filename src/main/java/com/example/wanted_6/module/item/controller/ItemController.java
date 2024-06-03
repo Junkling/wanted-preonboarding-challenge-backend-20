@@ -7,6 +7,9 @@ import com.example.wanted_6.module.item.dto.payload.SearchCond;
 import com.example.wanted_6.module.item.dto.result.ItemResult;
 import com.example.wanted_6.module.item.service.ItemService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/items")
+@Slf4j
 public class ItemController {
     private final ItemService itemService;
 
@@ -29,33 +33,26 @@ public class ItemController {
 
     @GetMapping()
     public ResponseEntity<Page<ItemResult>> getItems(
-            @RequestParam(name = "itemName") String itemName,
-            @RequestParam(name = "status") Status status,
+            @RequestParam(name = "itemName", required = false) String itemName,
+            @RequestParam(name = "status", required = false) Status status,
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,
             @RequestParam(name = "size", defaultValue = "5", required = false) int size,
             @AuthenticationPrincipal Long userId) {
         Page<ItemResult> pageResult = itemService.findPage(new SearchCond(itemName, status), userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate")));
         return ResponseEntity.status(HttpStatus.OK).body(pageResult);
     }
-    @GetMapping("/seller")
-    public ResponseEntity<Page<ItemResult>> getItemsBySeller(
-            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
-            @RequestParam(name = "size", defaultValue = "5", required = false) int size,
-            @AuthenticationPrincipal Long userId) {
-        Page<ItemResult> pageResult = itemService.findPageBySellerId(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate")));
-        return ResponseEntity.status(HttpStatus.OK).body(pageResult);
-    }
 
 
     @GetMapping("/{itemId}")
     public ResponseEntity<ItemResult> getOneByItemId(@PathVariable(name = "itemId") Long itemId, @AuthenticationPrincipal Long userId) {
+        log.info("왜 쳐 안됨");
         ItemResult result = itemService.findById(itemId, userId);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
     @PatchMapping("/{itemId}")
-    public ResponseEntity<ItemResult> updateItemByItemId(@PathVariable(name = "itemId") Long itemId, @RequestBody ItemEditPayload payload, @AuthenticationPrincipal Long userId) {
-        ItemResult itemResult = itemService.updateItemByItemId(payload, itemId, userId);
+    public ResponseEntity<ItemResult> editItemByItemId(@PathVariable(name = "itemId") Long itemId, @RequestBody ItemEditPayload payload, @AuthenticationPrincipal Long userId) {
+        ItemResult itemResult = itemService.editItemByItemId(payload, itemId, userId);
         return ResponseEntity.status(HttpStatus.OK).body(itemResult);
     }
 }

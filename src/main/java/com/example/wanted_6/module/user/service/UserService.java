@@ -29,6 +29,8 @@ public class UserService {
         Users saved = userRepository.save(
                 Users.builder()
                         .username(signupPayload.getUsername())
+                        .nickname(signupPayload.getNickname())
+                        .role("USER")
                         .password(passwordEncoder.encode(signupPayload.getPassword()))
                         .build());
         return UserSimpleResult.of(saved);
@@ -44,6 +46,7 @@ public class UserService {
                         .userId(findUser.getId())
                         .nickname(findUser.getNickname())
                         .username(findUser.getUsername())
+                        .roles(List.of(findUser.getRole()))
                         .roles(List.of(findUser.getRole()))
                         .build());
         return new JwtTokenResult(accessToken);

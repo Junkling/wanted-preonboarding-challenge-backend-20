@@ -5,6 +5,9 @@ import com.example.wanted_6.module.common.entity.BaseEntity;
 import com.example.wanted_6.module.user.entity.Users;
 import jakarta.persistence.*;
 import lombok.*;
+import org.apache.coyote.BadRequestException;
+
+import java.io.IOException;
 
 @Entity
 @Getter
@@ -34,13 +37,18 @@ public class Item extends BaseEntity {
         this.stock = stock;
         if (this.itemStatus.equals(Status.ITEM_SOLD_OUT) && this.stock > 0) {
             this.itemStatus = Status.ITEM_SELLING;
+        } else if (!this.itemStatus.equals(Status.ITEM_SOLD_OUT) && this.stock <= 0) {
+            this.itemStatus = Status.ITEM_SOLD_OUT;
         }
     }
 
     public void sell() {
-        if(this.stock < 0) {
+        if(this.stock <= 0) {
             throw new IllegalArgumentException("재고 부족입니다.");
         }
-        this.stock -= this.stock;
+        this.stock = this.stock - 1;
+        if (this.stock == 0) {
+            this.itemStatus = Status.ITEM_SOLD_OUT;
+        }
     }
 }

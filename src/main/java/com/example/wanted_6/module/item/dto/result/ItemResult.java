@@ -11,7 +11,9 @@ public class ItemResult {
 
     private String itemName;
 
-    private String price;
+    private Integer price;
+
+    private Integer stock;
 
     private Status itemStatus;
 
@@ -21,7 +23,8 @@ public class ItemResult {
         ItemResult itemResult = new ItemResult();
         itemResult.setId(item.getId());
         itemResult.setItemName(item.getItemName());
-        itemResult.setPrice(item.getPrice().toString());
+        itemResult.setStock(item.getStock());
+        itemResult.setPrice(item.getPrice());
         itemResult.setItemStatus(item.getItemStatus());
         itemResult.setSellerInfo(UserSimpleResult.of(item.getSeller()));
         return itemResult;
