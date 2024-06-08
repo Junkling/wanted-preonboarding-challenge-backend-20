@@ -1,5 +1,7 @@
 package com.example.wanted_6.module.user.service;
 
+import com.example.wanted_6.global.exception.CustomException;
+import com.example.wanted_6.global.exception.ErrorCode;
 import com.example.wanted_6.module.user.dto.payload.SignInPayLoad;
 import com.example.wanted_6.module.user.dto.payload.SignUpPayload;
 import com.example.wanted_6.module.user.dto.result.JwtTokenResult;
@@ -15,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+
+import static com.example.wanted_6.global.exception.ErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +41,7 @@ public class UserService {
     }
 
     public JwtTokenResult signIn(SignInPayLoad signInPayLoad) {
-        Users findUser = userRepository.findByUsername(signInPayLoad.getUsername()).orElseThrow(() -> new NoSuchElementException("해당하는 아이디의 회원이 없습니다."));
+        Users findUser = userRepository.findByUsername(signInPayLoad.getUsername()).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
         if (!passwordEncoder.matches(signInPayLoad.getPassword(), findUser.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }

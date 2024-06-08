@@ -31,7 +31,10 @@ public class Orders extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Status orderStatus;
 
-    public void updateStatus(Status status) {
+    public void updateStatus(Status status, Long userId) {
+        if (!this.seller.getId().equals(userId)) {
+            throw new IllegalArgumentException("상품 판매자만 주문 상태를 변경 할 수 있습니다.");
+        }
         if (status.equals(Status.ORDER_COMPLETE)) {
             this.item.sell();
         }

@@ -1,5 +1,6 @@
 package com.example.wanted_6.module.order.service;
 
+import com.example.wanted_6.global.exception.CustomException;
 import com.example.wanted_6.module.common.entity.Status;
 import com.example.wanted_6.module.item.dto.payload.SearchCond;
 import com.example.wanted_6.module.item.dto.result.ItemResult;
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.NoSuchElementException;
+import static com.example.wanted_6.global.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -31,8 +32,8 @@ public class OrderService {
 
     @Transactional
     public OrderResult order(Long userId, Long itemId) {
-        Users users = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("유저 정보를 찾을 수 없습니다."));
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new NoSuchElementException("해당하는 상품이 없습니다."));
+        Users users = userRepository.findById(userId).orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new CustomException(ITEM_NOT_FOUND));
 
         Orders saved = orderRepository.save(
                 Orders.builder()
@@ -48,7 +49,7 @@ public class OrderService {
 
     public Page<OrderResult> findAllByConsumerId(SearchCond cond, Long userId, Pageable pageable) {
         if (!userRepository.existsById(userId)) {
-            throw new NoSuchElementException("회원정보를 찾을 수 없습니다.");
+            throw new CustomException(USER_NOT_FOUND);
         }
         if (StringUtils.hasText(cond.getItemName())) {
             if (cond.getStatus() != null && StringUtils.hasText(cond.getStatus().getValue())) {
@@ -65,27 +66,25 @@ public class OrderService {
     }
 
     public OrderResult findById(Long orderId, Long userId) {
-        Orders orders = orderRepository.findById(orderId).orElseThrow(() -> new NoSuchElementException("주문 정보를 찾을 수 없습니다."));
+        Orders orders = orderRepository.findById(orderId).orElseThrow(() -> new CustomException(ORDER_NOT_FOUND));
         if (!orders.getConsumer().getId().equals(userId)) {
-            throw new IllegalArgumentException("주문자가 아닙니다.");
+            throw new CustomException(CONSUMER_FORBIDDEN);
         }
         return toOrderResult(orders);
     }
 
     public Page<OrderResult> findAllBySellerId(Long userId, Pageable pageable) {
         if (!userRepository.existsById(userId)) {
-            throw new IllegalArgumentException("유저 정보를 찾을 수 없습니다.");
+            throw new CustomException(USER_NOT_FOUND);
         }
         return orderRepository.findAllBySellerId(userId, pageable).map(this::toOrderResult);
     }
 
     @Transactional
     public OrderResult updateStatusByOrderId(Long orderId, Long userId, OrderUpdatePayload payload) {
-        Orders orders = orderRepository.findById(orderId).orElseThrow(() -> new NoSuchElementException("주문 정보가 없습니다."));
-        if (!orders.getSeller().getId().equals(userId)) {
-            throw new IllegalArgumentException("상품 판매자만 주문 상태를 변경 할 수 있습니다.");
-        }
-        orders.updateStatus(payload.getStatus());
+        Orders orders = orderRepository.findById(orderId).orElseThrow(() -> new CustomException(ORDER_NOT_FOUND));
+
+        orders.updateStatus(payload.getStatus(), userId);
         return toOrderResult(orders);
     }
 

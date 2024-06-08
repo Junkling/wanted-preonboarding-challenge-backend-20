@@ -1,5 +1,6 @@
 package com.example.wanted_6.module.item.service;
 
+import com.example.wanted_6.global.exception.CustomException;
 import com.example.wanted_6.module.common.entity.Status;
 import com.example.wanted_6.module.item.dto.payload.ItemEditPayload;
 import com.example.wanted_6.module.item.dto.payload.ItemSavePayload;
@@ -13,13 +14,12 @@ import com.example.wanted_6.module.user.dto.result.UserSimpleResult;
 import com.example.wanted_6.module.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.NoSuchElementException;
+import static com.example.wanted_6.global.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -37,23 +37,23 @@ public class ItemService {
                         .itemStatus(payload.getItemStatus())
                         .price(payload.getPrice())
                         .stock(payload.getStock())
-                        .seller(userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("유저 정보를 찾을수 없습니다.")))
+                        .seller(userRepository.findById(userId).orElseThrow(() -> new CustomException(ITEM_NOT_FOUND)))
                         .build());
         return toItemResult(save, userId);
     }
 
     @Transactional
     public ItemResult editItemByItemId(ItemEditPayload payload, Long itemId, Long userId) {
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new NoSuchElementException("상품 정보를 찾을 수 없습니다."));
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new CustomException(ITEM_NOT_FOUND));
         if (!item.getSeller().getId().equals(userId)) {
-            throw new IllegalArgumentException("판매자만 수정 가능합니다.");
+            throw new CustomException(SELLER_FORBIDDEN);
         }
         item.edit(payload.getName(), payload.getPrice(), payload.getStock());
         return toItemResult(item, userId);
     }
 
     public ItemResult findById(Long id, Long userId) {
-        Item item = itemRepository.findById(id).orElseThrow(() -> new NoSuchElementException("상품 정보를 찾을 수 없습니다."));
+        Item item = itemRepository.findById(id).orElseThrow(() -> new CustomException(ITEM_NOT_FOUND));
         return toItemResult(item, userId);
     }
 
@@ -74,7 +74,7 @@ public class ItemService {
 
     public Page<ItemResult> findPageBySellerId(Long userId, Pageable pageRequest) {
         if (!userRepository.existsById(userId)) {
-            throw new NoSuchElementException("유저 정보를 찾을 수 없습니다.");
+            throw new CustomException(USER_NOT_FOUND);
         }
         return itemRepository.findAllBySellerId(userId, pageRequest).map((i) -> toItemResult(i, userId));
     }
